@@ -4,9 +4,7 @@ import {
   Music2,
   Piano,
   FileMusic,
-  Clock,
   Orbit,
-  AudioLines,
   Sigma,
   ChartNoAxesCombined,
   FlaskConical,
@@ -64,24 +62,6 @@ export const navigation: NavigationGroup[] = [
     title: 'Laboratory',
     items: [
       {
-        label: 'Note Clock',
-        path: '/note-clock',
-        icon: Clock,
-        description: 'Pitch and frequency geometry',
-      },
-      {
-        label: 'Spirals',
-        path: '/spirals',
-        icon: Orbit,
-        description: 'Musical and mathematical spirals',
-      },
-      {
-        label: 'Harmonics',
-        path: '/harmonics',
-        icon: AudioLines,
-        description: 'Harmonic series and sound spectra',
-      },
-      {
         label: 'Mathematics',
         path: '/mathematics',
         icon: Sigma,
@@ -94,10 +74,22 @@ export const navigation: NavigationGroup[] = [
         description: 'Analyze musical compositions',
       },
       {
+        label: 'Sound Laboratory',
+        path: '/sound',
+        icon: AudioWaveform,
+        description: 'Sound synthesis and frequency experiments',
+      },
+      {
         label: 'Theory Laboratory',
         path: '/theory',
         icon: Music2,
         description: 'Scales, chords and musical harmony',
+      },
+      {
+        label: 'Geometry Laboratory',
+        path: '/geometry',
+        icon: Orbit,
+        description: 'Explore musical geometry and mathematical relationships',
       },
       {
         label: 'Experiments',
@@ -110,12 +102,6 @@ export const navigation: NavigationGroup[] = [
   {
     title: 'Audio',
     items: [
-      {
-        label: 'Sound Laboratory',
-        path: '/sound',
-        icon: AudioWaveform,
-        description: 'Sound synthesis and frequency experiments',
-      },
       {
         label: 'Instruments',
         path: '/instruments',

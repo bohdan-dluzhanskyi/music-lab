@@ -6,12 +6,13 @@ import OverviewPage from '@/pages/OverviewPage/OverviewPage';
 import WorkspacePage from '@/pages/WorkspacePage/WorkspacePage';
 import SoundPage from '@/pages/SoundPage/SoundPage';
 import TheoryPage from '@/pages/TheoryPage/TheoryPage';
+import GeometryPage from '@/pages/GeometryPage/GeometryPage';
 
 import { navigation } from './navigation';
 
 const workspaceRoutes = navigation
   .flatMap((group) => group.items)
-  .filter((item) => item.path !== '/')
+  .filter((item) => item.path !== '/' && item.path !== '/geometry')
   .map((item) => ({
     path: item.path.slice(1),
 
@@ -31,6 +32,10 @@ export const router = createHashRouter([
     element: <AppLayout />,
 
     children: [
+      {
+        path: 'geometry',
+        element: <GeometryPage />,
+      },
       {
         index: true,
         element: <OverviewPage />,
