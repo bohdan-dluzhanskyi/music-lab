@@ -1,8 +1,10 @@
 import { createHashRouter, Navigate } from 'react-router-dom';
 
 import AppLayout from '@/layouts/AppLayout/AppLayout';
+
 import OverviewPage from '@/pages/OverviewPage/OverviewPage';
 import WorkspacePage from '@/pages/WorkspacePage/WorkspacePage';
+import SoundPage from '@/pages/SoundPage/SoundPage';
 
 import { navigation } from './navigation';
 
@@ -11,7 +13,8 @@ const workspaceRoutes = navigation
   .filter((item) => item.path !== '/')
   .map((item) => ({
     path: item.path.slice(1),
-    element: <WorkspacePage item={item} />,
+
+    element: item.path === '/sound' ? <SoundPage /> : <WorkspacePage item={item} />,
   }));
 
 export const router = createHashRouter([

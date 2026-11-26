@@ -10,9 +10,23 @@ import { useProjectStore } from '@/stores/project.store';
 
 import './FrequencyConverter.scss';
 
+import { Play, Square } from 'lucide-react';
+
+import { useAudioStore } from '@/stores/audio.store';
+
+import { isAudioFrequency } from '@/engines/audio/constants';
+
 const PRESETS = [110, 220, 261.625565, 440, 660, 880];
 
 export default function FrequencyConverter() {
+  const playTone = useAudioStore((state) => state.playTone);
+
+  const stopAll = useAudioStore((state) => state.stopAll);
+
+  const setPreviewFrequency = useAudioStore((state) => state.setPreviewFrequency);
+
+  const audioError = useAudioStore((state) => state.error);
+
   const [value, setValue] = useState('440');
 
   const reference = useProjectStore((state) => state.referenceFrequency);
@@ -89,6 +103,31 @@ export default function FrequencyConverter() {
           </button>
         ))}
       </div>
+      <div className="frequency-converter__actions">
+        <button
+          type="button"
+          disabled={!isAudioFrequency(frequency)}
+          onClick={() => {
+            setPreviewFrequency(frequency);
+
+            void playTone(frequency, 1);
+          }}
+        >
+          <Play size={16} />
+          Play Frequency
+        </button>
+
+        <button type="button" onClick={stopAll}>
+          <Square size={16} />
+          Stop
+        </button>
+      </div>
+
+      {audioError && (
+        <p role="alert" className="frequency-converter__error">
+          {audioError}
+        </p>
+      )}
 
       {isValid ? (
         <>

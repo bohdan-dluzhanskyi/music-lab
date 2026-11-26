@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { audioEngine } from '@/engines/audio/AudioEngine';
 
 interface ProjectState {
   name: string;
@@ -36,9 +37,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
   setVolume: (volume) => {
     if (!Number.isFinite(volume)) return;
 
-    set({
-      volume: Math.min(1, Math.max(0, volume)),
-    });
+    const normalizedVolume = Math.min(1, Math.max(0, volume));
+
+    audioEngine.setVolume(normalizedVolume);
+
+    set({ volume: normalizedVolume });
   },
 
   setReferenceFrequency: (frequency) => {

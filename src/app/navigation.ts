@@ -12,6 +12,7 @@ import {
   Guitar,
   SlidersHorizontal,
   Settings,
+  AudioWaveform,
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -102,6 +103,12 @@ export const navigation: NavigationGroup[] = [
   {
     title: 'Audio',
     items: [
+      {
+        label: 'Sound Laboratory',
+        path: '/sound',
+        icon: AudioWaveform,
+        description: 'Sound synthesis and frequency experiments',
+      },
       {
         label: 'Instruments',
         path: '/instruments',
