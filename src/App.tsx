@@ -1,10 +1,7 @@
-function App() {
-  return (
-    <main>
-      <h1>Music Lab</h1>
-      <p>Music, Mathematics & Geometry</p>
-    </main>
-  );
-}
+import { RouterProvider } from 'react-router-dom';
 
-export default App;
+import { router } from '@/app/router';
+
+export default function App() {
+  return <RouterProvider router={router} />;
+}

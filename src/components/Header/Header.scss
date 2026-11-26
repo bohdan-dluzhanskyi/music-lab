@@ -1,0 +1,50 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  min-height: var(--header-height);
+  padding: 0 var(--space-5);
+
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+
+  &__location,
+  &__project {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  &__location {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+
+    strong {
+      color: var(--color-text);
+      font-weight: 500;
+    }
+  }
+
+  &__project {
+    color: var(--color-text-secondary);
+
+    input {
+      width: 170px;
+      padding: var(--space-1) var(--space-2);
+
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+
+      color: var(--color-text);
+      font-size: var(--font-size-sm);
+
+      &:hover,
+      &:focus {
+        border-color: var(--color-border);
+      }
+    }
+  }
+}
