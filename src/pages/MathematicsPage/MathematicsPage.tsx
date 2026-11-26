@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Play, Square, Sigma, Download } from 'lucide-react';
+import { Play, Square, Sigma, Download, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { generateFrequencies, type GeneratorType } from '@/core/composition/generators';
 
@@ -23,6 +24,9 @@ import { useAudioStore } from '@/stores/audio.store';
 import { useProjectStore } from '@/stores/project.store';
 
 import SequencePreview from '@/features/mathematics/SequencePreview';
+
+import { useCompositionStore } from '@/stores/composition.store';
+import { useSequencerStore } from '@/stores/sequencer.store';
 
 import './MathematicsPage.scss';
 
@@ -78,6 +82,9 @@ export default function MathematicsPage() {
   const setBpm = useProjectStore((state) => state.setBpm);
 
   const playChord = useAudioStore((state) => state.playChord);
+
+  const navigate = useNavigate();
+  const importSequence = useCompositionStore((state) => state.importSequence);
 
   const durationBeats = 0.5;
   const totalBeats = count * durationBeats;
@@ -250,6 +257,16 @@ export default function MathematicsPage() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  function sendToComposer() {
+    useSequencerStore.getState().stop();
+
+    importSequence(sequence, `${generator} — ${weight}%`, totalBeats);
+
+    useCompositionStore.getState().setBpm(bpm);
+
+    navigate('/composer');
+  }
+
   return (
     <section className="mathematics-page">
       <header className="mathematics-page__header">
@@ -354,6 +371,10 @@ export default function MathematicsPage() {
               <button onClick={exportSequence}>
                 <Download size={16} />
                 Export JSON
+              </button>
+              <button disabled={isPlaying || !sequence.length} onClick={sendToComposer}>
+                <ArrowRight size={16} />
+                Send to Composer
               </button>
             </div>
 

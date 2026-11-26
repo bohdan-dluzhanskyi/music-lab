@@ -1,0 +1,259 @@
+.composer-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: var(--space-6);
+
+  button,
+  input,
+  select {
+    min-width: 0;
+    min-height: 30px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: 12px;
+  }
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    &:hover:not(:disabled),
+    &.is-active {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+
+    &.is-active {
+      background: var(--color-accent-muted);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  input[type='range'] {
+    width: 100%;
+    padding: 0;
+    accent-color: var(--color-accent);
+  }
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+
+    > svg {
+      color: var(--color-accent);
+    }
+
+    > input {
+      flex: 1;
+      font-size: 16px;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    input {
+      width: 65px;
+    }
+  }
+
+  &__arrangement {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  &__editor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 230px;
+    gap: 12px;
+  }
+}
+
+.composer-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  h2 {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+}
+
+.track-list {
+  min-width: 0;
+  border-right: 1px solid var(--color-border);
+
+  > .composer-panel-header {
+    height: 28px;
+    padding: 0 8px;
+
+    button {
+      min-height: 24px;
+      padding: 2px 6px;
+    }
+  }
+}
+
+.track-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  height: 132px;
+  padding: 8px;
+  border-left: 3px solid;
+  border-bottom: 1px solid var(--color-border);
+
+  &.is-selected {
+    background: var(--color-accent-muted);
+  }
+
+  &__name {
+    justify-content: flex-start !important;
+    min-height: 20px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    input {
+      flex: 1;
+      width: 0;
+    }
+
+    button {
+      flex-shrink: 0;
+      padding: 4px 6px;
+    }
+  }
+}
+
+.composer-timeline {
+  min-width: 0;
+  overflow-x: auto;
+
+  svg {
+    display: block;
+    max-width: none;
+    cursor: crosshair;
+  }
+}
+
+.piano-roll,
+.note-inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.piano-roll {
+  &__viewport {
+    max-height: 420px;
+    overflow: auto;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+
+    svg {
+      display: block;
+      max-width: none;
+      cursor: crosshair;
+    }
+  }
+}
+
+.note-inspector {
+  h2 {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  &__pitch {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--color-accent);
+    }
+
+    span {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+  }
+
+  &__details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.composer-hint {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 1050px) {
+  .composer-page__editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
