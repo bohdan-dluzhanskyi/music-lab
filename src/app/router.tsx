@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout/AppLayout';
 import OverviewPage from '@/pages/OverviewPage/OverviewPage';
 import WorkspacePage from '@/pages/WorkspacePage/WorkspacePage';
 import SoundPage from '@/pages/SoundPage/SoundPage';
+import TheoryPage from '@/pages/TheoryPage/TheoryPage';
 
 import { navigation } from './navigation';
 
@@ -14,7 +15,14 @@ const workspaceRoutes = navigation
   .map((item) => ({
     path: item.path.slice(1),
 
-    element: item.path === '/sound' ? <SoundPage /> : <WorkspacePage item={item} />,
+    element:
+      item.path === '/sound' ? (
+        <SoundPage />
+      ) : item.path === '/theory' ? (
+        <TheoryPage />
+      ) : (
+        <WorkspacePage item={item} />
+      ),
   }));
 
 export const router = createHashRouter([

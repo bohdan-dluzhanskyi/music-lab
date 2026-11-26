@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Music,
+  Music2,
   Piano,
   FileMusic,
   Clock,
@@ -91,6 +92,12 @@ export const navigation: NavigationGroup[] = [
         path: '/analyzer',
         icon: ChartNoAxesCombined,
         description: 'Analyze musical compositions',
+      },
+      {
+        label: 'Theory Laboratory',
+        path: '/theory',
+        icon: Music2,
+        description: 'Scales, chords and musical harmony',
       },
       {
         label: 'Experiments',
