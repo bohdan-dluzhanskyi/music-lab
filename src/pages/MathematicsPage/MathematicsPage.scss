@@ -1,0 +1,243 @@
+.mathematics-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: var(--space-8);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    > svg {
+      color: var(--color-accent);
+    }
+
+    span {
+      font-size: 12px;
+      color: var(--color-accent);
+    }
+
+    h1 {
+      margin: 4px 0;
+      font-size: 26px;
+      font-weight: 500;
+    }
+
+    p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+  }
+}
+
+.math-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+
+  h2 {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+  }
+
+  button,
+  select {
+    min-height: 34px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-elevated);
+    color: var(--color-text);
+    font-size: 12px;
+    transition: var(--transition);
+  }
+
+  button {
+    &:hover:not(:disabled),
+    &.is-active {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    &.is-active {
+      background: var(--color-accent-muted);
+    }
+  }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+
+  button:disabled {
+    opacity: 0.45;
+  }
+
+  input[type='range'] {
+    width: 100%;
+  }
+
+  input[type='range'],
+  input[type='checkbox'] {
+    accent-color: var(--color-accent);
+  }
+
+  .math-checkbox {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.math-generators {
+  gap: 6px;
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  > button {
+    text-align: left;
+    background: transparent;
+  }
+
+  fieldset {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+.math-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.math-preview {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+
+  &__grid {
+    stroke: var(--color-border);
+    stroke-width: 0.6;
+  }
+
+  &__note {
+    fill: var(--color-accent);
+  }
+}
+
+.math-actions,
+.math-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.math-actions {
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.math-weight {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+
+  span:last-child {
+    color: var(--color-accent);
+  }
+}
+
+.math-rhythm {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 4px;
+
+  span {
+    height: 28px;
+    border-radius: 3px;
+    background: var(--color-surface-elevated);
+
+    &.is-active {
+      background: var(--color-accent);
+    }
+  }
+}
+
+.math-results {
+  margin-top: 16px;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg);
+    }
+
+    strong {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-accent);
+    }
+
+    span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-secondary);
+    }
+  }
+}
+
+@media (max-width: 1050px) {
+  .mathematics-page__layout {
+    grid-template-columns: 1fr;
+  }
+}

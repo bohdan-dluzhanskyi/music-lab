@@ -62,10 +62,10 @@ export const navigation: NavigationGroup[] = [
     title: 'Laboratory',
     items: [
       {
-        label: 'Mathematics',
+        label: 'Mathematics Laboratory',
         path: '/mathematics',
         icon: Sigma,
-        description: 'Mathematical music generators',
+        description: 'Algorithmic music composition',
       },
       {
         label: 'Analyzer',
