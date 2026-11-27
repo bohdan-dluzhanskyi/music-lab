@@ -63,6 +63,7 @@ navigation. Tonal is declared in the manifest and has no current application imp
 - [Roadmap](docs/roadmap.md)
 - [Technical debt](docs/technical-debt.md)
 - [Experiment methodology](docs/experiments.md)
+- [Research records and hypotheses](docs/research/README.md)
 - [Architecture decisions](docs/decisions/README.md)
 - [Music Lab Constitution](.specify/memory/constitution.md)
 

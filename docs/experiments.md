@@ -1,8 +1,9 @@
 # Experiment methodology
 
-This document defines a protocol for future studies. It contains no historical experiments
-or results. The [scientific foundations](scientific-foundations.md) define the mathematical
-models, and stage 14 of the [roadmap](roadmap.md) covers experiment records in the application.
+This document defines a protocol for future studies. The [research register](research/README.md)
+holds historical records, working hypotheses, and planned studies. The
+[scientific foundations](scientific-foundations.md) define the mathematical models, and
+stage 14 of the [roadmap](roadmap.md) covers experiment records in the application.
 
 ## Design the comparison
 
