@@ -14,6 +14,7 @@ import type { NoteEvent } from '@/core/types/music.types';
 import type { Clef } from '@/core/types/notation.types';
 
 import { prepareScore, type ScoreEvent } from '@/core/notation/score';
+
 import { frequencyToNotationPitch } from '@/core/notation/pitch';
 
 import { NOTATION_LAYOUT } from './constants';
@@ -33,6 +34,7 @@ interface RenderedEvent {
 }
 
 export class NotationEngine {
+  // Create a notation element from a prepared score event.
   private createStaveNote(event: ScoreEvent, clef: Clef, showCents: boolean): StaveNote {
     const pitches = event.notes.map((note) => frequencyToNotationPitch(note.pitch.frequency));
 
@@ -45,12 +47,14 @@ export class NotationEngine {
       dots: event.dots,
     });
 
+    // Attach rhythmic dots.
     for (let index = 0; index < event.dots; index++) {
       Dot.buildAndAttach([staveNote], {
         all: true,
       });
     }
 
+    // Add accidentals and microtonal annotations.
     if (!event.isRest) {
       pitches.forEach((pitch, index) => {
         if (pitch.accidental) {
@@ -71,6 +75,7 @@ export class NotationEngine {
     return staveNote;
   }
 
+  // Render the prepared score as SVG.
   render(container: HTMLDivElement, options: NotationRenderOptions): void {
     const { notes, lengthBeats, timeSignature, clef = 'treble', showCents = true } = options;
 
@@ -78,6 +83,7 @@ export class NotationEngine {
 
     const measures = prepareScore(notes, lengthBeats, timeSignature);
 
+    // Calculate score dimensions.
     const rows = Math.ceil(measures.length / layout.measuresPerRow);
 
     const width =
@@ -87,6 +93,7 @@ export class NotationEngine {
 
     const height = rows * layout.staffHeight + layout.padding * 2;
 
+    // Initialize the SVG renderer.
     container.replaceChildren();
 
     const renderer = new Renderer(container, Renderer.Backends.SVG);
@@ -102,6 +109,7 @@ export class NotationEngine {
 
     const ties: StaveTie[] = [];
 
+    // Render measures.
     for (const measure of measures) {
       const row = Math.floor(measure.index / layout.measuresPerRow);
 
@@ -117,6 +125,7 @@ export class NotationEngine {
 
       const stave = new Stave(x, y, measureWidth);
 
+      // Add clef and time signature at the start of each row.
       if (column === 0) {
         stave.addClef(clef);
 
@@ -125,6 +134,7 @@ export class NotationEngine {
 
       stave.setContext(context).draw();
 
+      // Convert prepared events into VexFlow voices.
       const voices = measure.voices.map((events, voiceIndex) => {
         const voice = new Voice({
           numBeats: timeSignature[0],
@@ -136,6 +146,7 @@ export class NotationEngine {
 
           const previous = previousEvents.get(voiceIndex);
 
+          // Connect sustained notes within the same row.
           if (
             previous &&
             previous.event.tieToNext &&
@@ -168,9 +179,10 @@ export class NotationEngine {
         return voice;
       });
 
-      // Resolve repeated accidentals within the measure.
+      // Resolve accidentals within the measure.
       Accidental.applyAccidentals(voices, 'C');
 
+      // Format and draw voices.
       new Formatter().joinVoices(voices).formatToStave(voices, stave);
 
       voices.forEach((voice) => {
@@ -178,12 +190,14 @@ export class NotationEngine {
       });
     }
 
+    // Draw ties after all notes have been positioned.
     ties.forEach((tie) => {
       tie.setContext(context).draw();
     });
   }
 
-  clear(container: HTMLDivElement): void {
+  // Remove rendered notation.
+  clear(container: HTMLElement): void {
     container.replaceChildren();
   }
 }

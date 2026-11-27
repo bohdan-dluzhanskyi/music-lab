@@ -1,6 +1,45 @@
 import type { InstrumentTuning } from '@/core/types/notation.types';
 
 export const INSTRUMENT_TUNINGS = {
+  guitarSevenString: {
+    id: 'guitar-seven-string',
+    name: 'Guitar — 7 Strings',
+    instrument: 'guitar',
+    strings: [35, 40, 45, 50, 55, 59, 64],
+    maxFret: 24,
+  },
+
+  guitarOpenG: {
+    id: 'guitar-open-g',
+    name: 'Guitar — Open G',
+    instrument: 'guitar',
+    strings: [38, 43, 50, 55, 59, 62],
+    maxFret: 24,
+  },
+
+  guitarOpenD: {
+    id: 'guitar-open-d',
+    name: 'Guitar — Open D',
+    instrument: 'guitar',
+    strings: [38, 45, 50, 54, 57, 62],
+    maxFret: 24,
+  },
+
+  bassDropD: {
+    id: 'bass-drop-d',
+    name: 'Bass — Drop D',
+    instrument: 'bass',
+    strings: [26, 33, 38, 43],
+    maxFret: 24,
+  },
+
+  bassSixString: {
+    id: 'bass-six-string',
+    name: 'Bass — 6 Strings',
+    instrument: 'bass',
+    strings: [23, 28, 33, 38, 43, 48],
+    maxFret: 24,
+  },
   guitarStandard: {
     id: 'guitar-standard',
     name: 'Guitar — Standard',
