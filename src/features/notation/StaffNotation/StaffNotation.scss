@@ -1,0 +1,28 @@
+.staff-notation {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+
+  padding: var(--space-4);
+
+  background: #f5f5f0;
+  color: #252925;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  &__canvas {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  &__error {
+    padding: var(--space-3);
+    color: #a13b3b;
+  }
+
+  svg {
+    display: block;
+    max-width: none;
+  }
+}

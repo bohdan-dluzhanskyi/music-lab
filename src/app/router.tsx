@@ -10,6 +10,7 @@ import GeometryPage from '@/pages/GeometryPage/GeometryPage';
 import MathematicsPage from '@/pages/MathematicsPage/MathematicsPage';
 import ComposerPage from '@/pages/ComposerPage/ComposerPage';
 import PianoRollPage from '@/pages/PianoRollPage/PianoRollPage';
+import NotationPage from '@/pages/NotationPage/NotationPage';
 
 import { navigation } from './navigation';
 
@@ -21,7 +22,8 @@ const workspaceRoutes = navigation
       item.path !== '/geometry' &&
       item.path !== '/mathematics' &&
       item.path !== '/composer' &&
-      item.path !== '/piano-roll',
+      item.path !== '/piano-roll' &&
+      item.path !== '/notation',
   )
   .map((item) => ({
     path: item.path.slice(1),
@@ -42,6 +44,10 @@ export const router = createHashRouter([
     element: <AppLayout />,
 
     children: [
+      {
+        path: 'notation',
+        element: <NotationPage />,
+      },
       {
         path: 'composer',
         element: <ComposerPage />,
