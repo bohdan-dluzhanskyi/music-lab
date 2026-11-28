@@ -5,7 +5,7 @@
 ## Context
 
 Mathematics Lab and Composer use separate tempo settings. A sequence transfer currently
-preserves beats and uses the destination composition's tempo.
+preserves beats and sets the composition BPM to the Mathematics Lab BPM after import.
 
 ## Decision
 

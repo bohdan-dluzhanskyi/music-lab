@@ -9,11 +9,12 @@ exploring acoustics and musical theory, and investigating the patterns that give
 - Scales, chords, progressions, the circle of fifths, note clocks, spirals, and Lissajous figures.
 - Mathematical sequence generation, blending, scale quantization, and Euclidean rhythms.
 - Multitrack Composer and Piano Roll with local persistence, undo and redo, and sequenced playback.
-- Microtonal frequency preservation, single-staff notation, and guitar, bass, and ukulele tablature.
+- Microtonal frequency preservation, single-staff notation, piano grand staff, and guitar, bass, and ukulele tablature.
+- Shared composition playback from Notation, with a synchronized piano cursor, measure navigation, and Follow Playback.
 
-The current app runs in a browser. The piano grand staff, score playback synchronization,
-file exchange, musical analysis, experiment records, realistic instruments, and Tauri
-packaging are planned. See the [roadmap](docs/roadmap.md).
+The current app runs in a browser. Synchronization for Standard Notation and Tablature is
+next. File exchange, musical analysis, experiment records, realistic instruments, and Tauri
+packaging remain planned. See the [roadmap](docs/roadmap.md).
 
 ## Run locally
 

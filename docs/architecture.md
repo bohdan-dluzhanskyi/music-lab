@@ -12,12 +12,12 @@ layout, APIs, file formats, and technology choices require an approved feature p
 | Music Theory Core | Implemented | Frequency and pitch conversions, intervals, harmonics, scales, chords, keys, and harmony in [core/music](../src/core/music). Uses domain types and numerical operations. |
 | Geometry Core | Implemented | Note clock, spirals, chord coordinates, angle sequences, and Lissajous samples in [core/geometry](../src/core/geometry). Uses mathematics and pitch conversions. |
 | Composition Core | Implemented | Composition and track construction, sequence generators, blending, quantization, rhythm, scheduling helpers, and beat conversion in [core/composition](../src/core/composition). Uses music, mathematics, and geometry. |
-| Notation Core | Implemented through 11C | Pitch spelling, rhythmic decomposition, voices, measures, score fragments, and tablature preparation in [core/notation](../src/core/notation). Consumes canonical note events. |
+| Notation Core | Implemented through 11D | Pitch spelling, rhythmic decomposition, voices, measures, score fragments, and tablature preparation in [core/notation](../src/core/notation). Derives deterministic written rhythm and approximation diagnostics from canonical note events. |
 | Analysis Core | Planned, 13 | Derive and describe measurable features of canonical works with declared tuning, segmentation, and units. |
 | Instrument Core | Partial, expanded in 15 | String tunings and physical fingering constraints live in [core/notation](../src/core/notation). General instrument ranges, capabilities, and playable articulations are future scope. |
 | Audio Engine | Implemented, expanded in 15 | [AudioEngine](../src/engines/audio/AudioEngine.ts) wraps Tone.js for synthetic preview, envelopes, gain, and limiting. Realistic instrument rendering is planned. |
-| Sequencer | Implemented, expanded in 11D | [Sequencer](../src/engines/audio/Sequencer.ts) schedules a composition snapshot through Tone.js track channels and derives the playback position from the audio clock. |
-| Notation Engine | Implemented through 11C | [Notation adapters](../src/engines/notation) prepare events through the core and render a single staff or tablature with VexFlow. Multiple staves, coordinated views, and editing are planned. |
+| Sequencer | Implemented, expanded in 11D | [Sequencer](../src/engines/audio/Sequencer.ts) schedules a composition snapshot with audio-context lookahead and per-event voice leases, applies the track mix and derives playback position from the audio clock. |
+| Notation Engine | Implemented through 11D | [Notation adapters](../src/engines/notation) consume shared prepared score data and render single-staff notation, piano grand staff, or tablature with VexFlow. Standard and Tablature synchronization remains stage 11E, and interactive editing remains stage 11F. |
 | Import/Export Engine | Planned, 12 | Validate and translate external data at the boundary, reporting unsupported fields and precision loss. A lab-to-Composer transfer already exists inside the application. |
 | Storage Engine | Partial capability, dedicated work planned in 12 | [Composition store](../src/stores/composition.store.ts) currently persists a versioned composition and selected track using Zustand browser storage. Project files, validated recovery, and migration are future scope. |
 | Experiment Engine | Planned, 14 | Capture inputs and versions, run or reproduce a documented protocol, and record measurements and artifacts. Current generators expose deterministic starting parameters. |
@@ -52,8 +52,9 @@ layout, APIs, file formats, and technology choices require an approved feature p
 4. Transport starts the Sequencer from a snapshot of the composition. The Sequencer converts
    beats to audio time using tempo and applies mute and solo. The sequencer store publishes
    the audio-derived beat position to Timeline and Piano Roll.
-5. Notation currently uses the preview mode of Transport. Stage 11D will bring score views
-   onto the same playback position without coupling cursor updates to full SVG layout.
+5. Notation uses the shared composition Transport. The Piano cursor projects the same
+   playback position onto the current score layout and updates independently of the SVG.
+   Measure navigation and Follow Playback use that shared position.
    [ADR-002](decisions/adr-002-playback-editing-policy.md) blocks musical edits during
    initialization and playback. Pause and Stop restore editing, and resume uses the latest
    composition. Navigation, track selection, zoom, and master volume remain available.

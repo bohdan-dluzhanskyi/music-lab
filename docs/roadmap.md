@@ -1,6 +1,6 @@
 # Music Lab roadmap
 
-Stages 01–11C are implemented as established by the repository audit. The first four
+Stages 01–11D are complete, for a total of **14 of 22 stages**. Stage **11E** is next. The first four
 stage labels describe a sequence of capabilities whose commits span several stages.
 The completion criteria below describe how to verify each capability today or accept a
 planned stage. They are documentation proposals and do not reconstruct past acceptance
@@ -27,6 +27,7 @@ specifications establish detailed requirements. See [architecture](architecture.
 | 11A · Notation Core | Define pitches, durations, measures, tunings, and basic string positions. | 04, 10 | Supported notes and durations map to notation primitives and string candidates. | Implemented |
 | 11B · Notation Engine | Prepare voices, measures, rests, and tie fragments and render a single SVG staff. | 11A | A supported track renders with the chosen clef, meter, and microtonal annotations. | Implemented |
 | 11C · Tablature Engine & Chord Fingering | Render tablature and offer fingering alternatives with constraints and diagnostics. | 11A, 11B | Playable groups use available strings and respect the declared span. Unplayable events are reported. | Implemented |
+| 11D · Piano Grand Staff & Sequencer Synchronization | Deliver aligned piano staves, shared derived rhythm with deviation diagnostics, source-linked ties across systems, and score navigation with Follow Playback. Share the composition Transport, isolate cursor updates, and gate editing during playback and startup. | 10, 11B | [Final verification](../specs/001-piano-grand-staff/verification.md#t042t045-final-technical-verification) records 45/45 tasks, 22/22 acceptance scenarios and 7/7 criteria, including offline production and owner listening. | Completed |
 
 The repository audit recorded 186 passing Vitest tests across 10 files, successful ESLint and
 TypeScript runs, and a successful production build with a large-chunk warning. That baseline
@@ -36,7 +37,6 @@ primarily covers domain code. It does not establish browser rendering or audio a
 
 | Stage | Goal and scope | Dependencies | Proposed completion criteria | Status |
 | --- | --- | --- | --- | --- |
-| 11D · Piano Grand Staff & Sequencer Synchronization | Render two aligned staves and share the composition Transport and playback cursor. | 10, 11B | Verify cross-staff layout, visible rhythm approximation, edit locking during initialization and playback, and seek into sustained notes per [ADR-001–003](decisions/README.md). Cover row-boundary ties, shared Transport, and stable score layout during cursor updates. | Planned |
 | 11E · Standard Notation & Tablature Synchronization | Coordinate timing, selection, and navigation across notation and instrument tablature. | 11C, 11D | Views identify the same source events and time positions, including split and unplayable events. | Planned |
 | 11F · Interactive Score Editing | Apply supported score and tablature edits to the canonical composition. | 10, 11E | Supported edits, undo, redo, and validation remain consistent across views. Unsupported edits receive a clear diagnostic. | Planned |
 | 12 · Project Storage, Import & Export | Introduce a versioned local project format and supported file exchange. | 10, canonical event contracts from 11A–11F | Verify offline round trips, migration, corrupted-input handling, and external format loss. Verify both tempo choices from [ADR-004](decisions/adr-004-mathematics-transfer-tempo.md) and specify versioned provenance with stage 14. | Planned |
