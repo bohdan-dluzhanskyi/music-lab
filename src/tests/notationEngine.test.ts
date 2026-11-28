@@ -8,7 +8,7 @@ import { frequencyToPitch } from '@/core/music/notes';
 
 import type { NoteEvent } from '@/core/types/music.types';
 
-import { prepareScore } from '@/core/notation/score';
+import { prepareScore, prepareScoreResult } from '@/core/notation/score';
 
 function note(frequency: number, startBeat: number, durationBeats: number): NoteEvent {
   return {
@@ -159,4 +159,39 @@ describe('Score preparation', () => {
       beats: 1.5,
     });
   });
+});
+
+it('preserves simultaneous attacks, note identities, and final visual padding', () => {
+  const notes = [note(220, 0.1, 0.5), note(440, 0.1, 1), note(110, 3.75, 1.75)];
+  const snapshot = structuredClone(notes);
+  const score = prepareScoreResult(notes, 5.5);
+  const sounds = score.measures[0]!.voices.flatMap((voice) => voice.segments).filter(
+    (event) => !event.isRest,
+  );
+  expect(
+    new Set(
+      sounds.filter((event) => event.notes[0]!.startBeat === 0.1).map((event) => event.startBeat),
+    ),
+  ).toEqual(new Set([0.09375]));
+  expect(score.measures[1]!.writtenPlaybackCutoff).toBe(5.5 * 256);
+  expect(score.measures[1]!.visualTail).toEqual([5.5 * 256, 8 * 256]);
+  expect(score.continuities.some((tie) => tie.sourceNoteId === notes[2]!.id)).toBe(true);
+  expect(notes).toEqual(snapshot);
+  for (const measure of score.measures) {
+    for (const voice of measure.voices) {
+      expect(voice.segments.reduce((sum, event) => sum + event.durationTicks, 0)).toBe(1024);
+    }
+  }
+});
+
+it('diagnoses events that cannot coexist with the final meter and padding', () => {
+  const original = note(440, 0, 0.03125);
+  const score = prepareScoreResult([original], 0.03125, [1, 64]);
+  expect(score.classification).toBe('partial');
+  expect(
+    score.diagnostics.some((diagnostic) => diagnostic.scope.sourceNoteIds.includes(original.id)),
+  ).toBe(true);
+  expect(score.measures[0]!.voices[0]!.segments.reduce((sum, event) => sum + event.beats, 0)).toBe(
+    0.0625,
+  );
 });

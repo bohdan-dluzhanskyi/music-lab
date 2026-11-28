@@ -8,3 +8,11 @@ export const NOTATION_LAYOUT = {
   foreground: '#252925',
   accent: '#91a894',
 } as const;
+
+export const PIANO_LAYOUT = {
+  staffSeparation: 110,
+  systemHeight: 295,
+  braceGutter: 18,
+  minMeasureWidth: 220,
+  maxSystemWidth: 1440,
+} as const;

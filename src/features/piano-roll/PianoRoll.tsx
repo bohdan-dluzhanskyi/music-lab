@@ -5,8 +5,9 @@ import { midiToNote } from '@/core/music/notes';
 
 import { getCompositionLength, snapBeat } from '@/core/composition/composition';
 
+import { compositionEditGate } from '@/stores/compositionEditGate';
 import { useCompositionStore } from '@/stores/composition.store';
-import { useSequencerStore } from '@/stores/sequencer.store';
+import { isCompositionPlaybackActive, useSequencerStore } from '@/stores/sequencer.store';
 import { useAudioStore } from '@/stores/audio.store';
 
 export default function PianoRoll() {
@@ -15,7 +16,8 @@ export default function PianoRoll() {
   const { composition, selectedTrackId, selectedNoteId, addNote, selectNote } =
     useCompositionStore();
 
-  const { position, status } = useSequencerStore();
+  const position = useSequencerStore((state) => state.position);
+  const editingLocked = useSequencerStore(isCompositionPlaybackActive);
 
   const playTone = useAudioStore((state) => state.playTone);
 
@@ -39,7 +41,10 @@ export default function PianoRoll() {
   const width = keyWidth + beats * beatWidth;
   const height = rows * rowHeight;
 
-  const playing = status === 'playing';
+  function selectPianoRollNote(id: string, frequency: number) {
+    selectNote(id);
+    if (!compositionEditGate.isLocked()) void playTone(frequency, 0.25);
+  }
 
   return (
     <section className="piano-roll">
@@ -63,7 +68,7 @@ export default function PianoRoll() {
           height={height}
           viewBox={`0 0 ${width} ${height}`}
           onDoubleClick={(event) => {
-            if (playing) return;
+            if (compositionEditGate.isLocked()) return;
 
             const bounds = event.currentTarget.getBoundingClientRect();
 
@@ -113,7 +118,7 @@ export default function PianoRoll() {
                   onClick={() => {
                     const frequency = midiToFrequency(midi);
 
-                    if (!playing && frequency >= 20 && frequency <= 20000) {
+                    if (!compositionEditGate.isLocked() && frequency >= 20 && frequency <= 20000) {
                       void playTone(frequency, 0.25);
                     }
                   }}
@@ -156,15 +161,20 @@ export default function PianoRoll() {
               fill={track.color}
               stroke={selectedNoteId === note.id ? 'var(--color-text)' : 'transparent'}
               strokeWidth={2}
+              role="button"
+              tabIndex={0}
+              aria-label={`${note.pitch.note}${note.pitch.octave}, beat ${note.startBeat}`}
+              aria-pressed={selectedNoteId === note.id}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                selectPianoRollNote(note.id, note.pitch.frequency);
+              }}
               onDoubleClick={(event) => event.stopPropagation()}
               onClick={(event) => {
                 event.stopPropagation();
 
-                selectNote(note.id);
-
-                if (!playing) {
-                  void playTone(note.pitch.frequency, 0.25);
-                }
+                selectPianoRollNote(note.id, note.pitch.frequency);
               }}
             >
               <title>{note.pitch.frequency.toFixed(3)} Hz</title>
@@ -183,7 +193,9 @@ export default function PianoRoll() {
       </div>
 
       <p className="composer-hint">
-        Double-click to add a note. Select a note to edit its parameters.
+        {editingLocked
+          ? 'Pause or stop playback to edit notes.'
+          : 'Double-click to add a note. Select a note to edit its parameters.'}
       </p>
     </section>
   );

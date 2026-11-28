@@ -7,16 +7,15 @@ import PianoRoll from '@/features/piano-roll/PianoRoll';
 import NoteInspector from '@/features/piano-roll/NoteInspector';
 
 import { useCompositionStore } from '@/stores/composition.store';
-import { useSequencerStore } from '@/stores/sequencer.store';
+import { isCompositionPlaybackActive, useSequencerStore } from '@/stores/sequencer.store';
 
 import './ComposerPage.scss';
 
 export default function ComposerPage() {
   const { composition, setName, setBpm, past, future, undo, redo, reset } = useCompositionStore();
 
-  const { status, error } = useSequencerStore();
-
-  const playing = status === 'playing';
+  const error = useSequencerStore((state) => state.error);
+  const editingLocked = useSequencerStore(isCompositionPlaybackActive);
 
   return (
     <section className="composer-page">
@@ -26,21 +25,21 @@ export default function ComposerPage() {
         <input
           aria-label="Composition name"
           value={composition.name}
-          disabled={playing}
+          disabled={editingLocked}
           onChange={(event) => setName(event.target.value)}
         />
 
         <div className="composer-page__actions">
-          <button disabled={playing || !past.length} onClick={undo} aria-label="Undo">
+          <button disabled={editingLocked || !past.length} onClick={undo} aria-label="Undo">
             <Undo2 size={16} />
           </button>
 
-          <button disabled={playing || !future.length} onClick={redo} aria-label="Redo">
+          <button disabled={editingLocked || !future.length} onClick={redo} aria-label="Redo">
             <Redo2 size={16} />
           </button>
 
           <button
-            disabled={playing}
+            disabled={editingLocked}
             onClick={() => {
               if (window.confirm('Create a new composition?')) {
                 reset();
@@ -58,7 +57,7 @@ export default function ComposerPage() {
               min={20}
               max={300}
               value={composition.bpm}
-              disabled={playing}
+              disabled={editingLocked}
               onChange={(event) => setBpm(event.target.valueAsNumber)}
             />
           </label>

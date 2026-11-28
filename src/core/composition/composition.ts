@@ -102,6 +102,8 @@ export function getScheduledNotes(
   fromBeat = 0,
   toBeat = getCompositionLength(composition),
 ): ScheduledNote[] {
+  if (fromBeat >= toBeat) return [];
+
   return getAudibleTracks(composition.tracks)
     .flatMap((track) =>
       track.notes
@@ -112,7 +114,8 @@ export function getScheduledNotes(
           const endBeat = Math.min(toBeat, note.startBeat + note.durationBeats);
 
           return {
-            trackId: track.id,
+            sourceNoteId: note.id,
+            trackId: note.trackId,
             frequency: note.pitch.frequency,
             startBeat,
             durationBeats: endBeat - startBeat,

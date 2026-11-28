@@ -3,16 +3,16 @@ import { Annotation, Dot, Formatter, GhostNote, Renderer, TabNote, TabStave, Voi
 import type { NoteEvent } from '@/core/types/music.types';
 import type { InstrumentTuning } from '@/core/types/notation.types';
 
-import { prepareScore } from '@/core/notation/score';
+import type { PreparedScore } from '@/core/notation/score';
 
-import { prepareTablature, type TablatureGroup } from '@/core/notation/tablature';
+import { prepareTablatureScore, type TablatureGroup } from '@/core/notation/tablature';
 
 import { NOTATION_LAYOUT } from './constants';
 
 export interface TablatureRenderOptions {
   notes: readonly NoteEvent[];
-  lengthBeats: number;
-  timeSignature: [number, number];
+  score: PreparedScore;
+  timeSignature: readonly [number, number];
   tuning: InstrumentTuning;
   maxStretch?: number;
   showCents?: boolean;
@@ -21,23 +21,19 @@ export interface TablatureRenderOptions {
 export interface TablatureRenderResult {
   groups: TablatureGroup[];
   unplayableCount: number;
+  diagnostics: PreparedScore['diagnostics'];
 }
 
 export class TablatureEngine {
   // Render tablature as SVG.
   render(container: HTMLDivElement, options: TablatureRenderOptions): TablatureRenderResult {
-    const { notes, lengthBeats, timeSignature, tuning, maxStretch = 4, showCents = true } = options;
-
-    // Calculate instrument fingerings.
-    const groups = prepareTablature(notes, tuning, maxStretch);
-
-    // Map original note IDs to fret positions.
-    const positions = new Map(
-      groups.flatMap((group) => group.notes).map((item) => [item.note.id, item.position] as const),
+    const { score, notes, timeSignature, tuning, maxStretch = 4, showCents = true } = options;
+    const { measures, groups, diagnostics, unplayableCount } = prepareTablatureScore(
+      score,
+      notes,
+      tuning,
+      maxStretch,
     );
-
-    // Prepare measures, rhythms and voices.
-    const measures = prepareScore(notes, lengthBeats, timeSignature);
 
     const layout = NOTATION_LAYOUT;
 
@@ -94,33 +90,29 @@ export class TablatureEngine {
       stave.setContext(context).draw();
 
       // Convert score events into tablature voices.
-      const voices = measure.voices.map((events) => {
+      const voices = measure.voices.map(({ segments }) => {
         const voice = new Voice({
           numBeats: timeSignature[0],
           beatValue: timeSignature[1],
         });
 
-        const tickables = events.map((event) => {
-          const duration = event.duration + 'd'.repeat(event.dots);
+        const tickables = segments.map(({ event, positions }) => {
+          const duration = event.duration;
+          const dots = event.dots;
 
-          const tabPositions = event.notes.map((note) => positions.get(note.id));
-
-          // Preserve rhythmic space for rests
-          // and unplayable notes.
-          if (event.isRest || tabPositions.some((position) => !position)) {
-            return new GhostNote({
-              duration,
-            });
+          // Ghosts preserve the formatted interval for rests and unplayable events.
+          if (event.isRest || positions.length !== event.sourceNoteIds.length) {
+            return new GhostNote({ duration, dots });
           }
 
-          // Create a tablature note or chord.
           const tabNote = new TabNote(
             {
-              positions: tabPositions.map((position) => ({
-                str: position!.string,
-                fret: position!.fret,
+              positions: positions.map(({ position }) => ({
+                str: position.string,
+                fret: position.fret,
               })),
               duration,
+              dots,
             },
             true,
           );
@@ -159,7 +151,7 @@ export class TablatureEngine {
       });
 
       // Format voices within the measure.
-      new Formatter().joinVoices(voices).formatToStave(voices, stave);
+      if (voices.length) new Formatter().joinVoices(voices).formatToStave(voices, stave);
 
       // Draw formatted voices.
       voices.forEach((voice) => {
@@ -170,8 +162,8 @@ export class TablatureEngine {
     // Return fingering information and diagnostics.
     return {
       groups,
-      unplayableCount: groups.flatMap((group) => group.notes).filter((item) => !item.position)
-        .length,
+      unplayableCount,
+      diagnostics,
     };
   }
 

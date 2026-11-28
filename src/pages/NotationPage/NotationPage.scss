@@ -127,3 +127,51 @@
     }
   }
 }
+
+.notation-page :is(button, input, select):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.notation-page__rhythm {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  summary {
+    color: var(--color-accent);
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 3px;
+    }
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    list-style: none;
+  }
+
+  li {
+    padding-block-start: var(--space-2);
+    border-top: 1px solid var(--color-border);
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: var(--space-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-text);
+  }
+}

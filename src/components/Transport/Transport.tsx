@@ -6,7 +6,7 @@ import { useProjectStore } from '@/stores/project.store';
 import { useAudioStore } from '@/stores/audio.store';
 
 import { useCompositionStore } from '@/stores/composition.store';
-import { useSequencerStore } from '@/stores/sequencer.store';
+import { isCompositionPlaybackActive, useSequencerStore } from '@/stores/sequencer.store';
 
 import { isAudioFrequency } from '@/engines/audio/constants';
 
@@ -15,7 +15,8 @@ import './Transport.scss';
 export default function Transport() {
   const { pathname } = useLocation();
 
-  const isComposer = pathname === '/composer' || pathname === '/piano-roll';
+  const isComposer =
+    pathname === '/composer' || pathname === '/piano-roll' || pathname === '/notation';
 
   const project = useProjectStore();
   const audio = useAudioStore();
@@ -25,7 +26,7 @@ export default function Transport() {
 
   const setCompositionBpm = useCompositionStore((state) => state.setBpm);
 
-  const playing = transport.status === 'playing';
+  const playing = isCompositionPlaybackActive(transport);
 
   const bpm = isComposer ? composition.bpm : project.bpm;
 
@@ -86,6 +87,18 @@ export default function Transport() {
       <div className="transport__time">
         {isComposer ? `${seconds.toFixed(3)} s` : `${audio.previewFrequency.toFixed(2)} Hz`}
       </div>
+
+      {isComposer && (
+        <span className="transport__phase" role="status">
+          {transport.status === 'initializing'
+            ? 'Initializing…'
+            : transport.status[0]!.toUpperCase() + transport.status.slice(1)}
+        </span>
+      )}
+      {isComposer && transport.error && <span role="alert">{transport.error}</span>}
+      {isComposer && transport.omitted > 0 && (
+        <span role="status">{transport.omitted} skipped audio events</span>
+      )}
 
       <div className="transport__group transport__parameters">
         <label>

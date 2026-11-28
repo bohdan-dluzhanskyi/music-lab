@@ -1,20 +1,23 @@
 import { create } from 'zustand';
 
-import type { PlaybackStatus } from '@/core/types/composition.types';
-
+import type { Composition, PlaybackStatus } from '@/core/types/composition.types';
 import { getCompositionLength } from '@/core/composition/composition';
-
 import { sequencer } from '@/engines/audio/Sequencer';
 
 import { useCompositionStore } from './composition.store';
 import { useProjectStore } from './project.store';
 import { useAudioStore } from './audio.store';
+import { compositionEditGate } from './compositionEditGate';
+
+export type PlaybackNavigation = 'play' | 'pause' | 'stop' | 'seek' | 'loop';
 
 interface SequencerState {
   status: PlaybackStatus;
   position: number;
   loop: boolean;
   error: string | null;
+  omitted: number;
+  navigation: { kind: PlaybackNavigation; revision: number };
 
   play: () => Promise<void>;
   pause: () => void;
@@ -23,40 +26,104 @@ interface SequencerState {
   toggleLoop: () => void;
 }
 
-let frame: number | null = null;
-let generation = 0;
+export function isCompositionPlaybackActive({ status }: Pick<SequencerState, 'status'>): boolean {
+  return status === 'initializing' || status === 'playing';
+}
 
-function cancelFrame() {
-  if (frame !== null) {
-    cancelAnimationFrame(frame);
-    frame = null;
-  }
+interface PlaybackSession {
+  requestId: number;
+  composition: Composition;
+  pendingTargetBeat: number;
+  editLock: symbol;
 }
 
 export const useSequencerStore = create<SequencerState>((set, get) => {
-  function tick() {
-    if (get().status !== 'playing') return;
+  let frame: number | undefined;
+  let generation = 0;
+  let session: PlaybackSession | undefined;
 
-    set({ position: sequencer.getPosition() });
+  function navigation(kind: PlaybackNavigation) {
+    return { kind, revision: get().navigation.revision + 1 };
+  }
 
-    if (sequencer.hasEnded()) {
-      sequencer.stop();
+  function cancelAudio() {
+    if (frame !== undefined) cancelAnimationFrame(frame);
+    frame = undefined;
+    sequencer.stop();
+  }
 
-      if (get().loop) {
-        set({
-          position: 0,
-          status: 'stopped',
+  function finish() {
+    generation++;
+    cancelAudio();
+    if (session) compositionEditGate.release(session.editLock);
+    session = undefined;
+  }
+
+  async function start(composition: Composition, requestedBeat: number, kind: PlaybackNavigation) {
+    const editLock = session
+      ? compositionEditGate.transfer(session.editLock)
+      : compositionEditGate.acquire();
+    if (!editLock) return;
+
+    const requestId = ++generation;
+    const end = getCompositionLength(composition);
+    const pendingTargetBeat = requestedBeat >= end && get().loop && end > 0 ? 0 : requestedBeat;
+    session = { requestId, composition, pendingTargetBeat, editLock };
+    cancelAudio();
+    set({
+      status: 'initializing',
+      position: pendingTargetBeat,
+      error: null,
+      navigation: navigation(kind),
+      omitted: 0,
+    });
+
+    const fail = (error: unknown) => {
+      if (session?.requestId !== requestId) return;
+      finish();
+      set({
+        status: 'paused',
+        navigation: navigation('pause'),
+        error: error instanceof Error ? error.message : 'Playback failed',
+      });
+    };
+
+    const tick = () => {
+      if (session?.requestId !== requestId) return;
+      set({ position: sequencer.getPosition(), omitted: sequencer.getOmittedCount() });
+      if (session?.requestId !== requestId) return;
+      if (sequencer.hasEnded()) {
+        frame = requestAnimationFrame(() => {
+          if (session?.requestId !== requestId) return;
+          if (get().loop) void start(session.composition, 0, 'loop');
+          else get().stop();
         });
-
-        void get().play();
-      } else {
-        get().stop();
+        return;
       }
+      frame = requestAnimationFrame(tick);
+    };
 
-      return;
+    try {
+      if (session?.requestId !== requestId) return;
+      if (kind === 'play') useAudioStore.getState().stopAll();
+      const started = await sequencer.play(
+        composition,
+        pendingTargetBeat,
+        useProjectStore.getState().volume,
+        fail,
+      );
+      if (session?.requestId !== requestId) return;
+      if (!started) {
+        finish();
+        set({ status: 'paused' });
+        return;
+      }
+      sequencer.setVolume(useProjectStore.getState().volume);
+      set({ status: 'playing' });
+      tick();
+    } catch (error) {
+      fail(error);
     }
-
-    frame = requestAnimationFrame(tick);
   }
 
   return {
@@ -64,92 +131,36 @@ export const useSequencerStore = create<SequencerState>((set, get) => {
     position: 0,
     loop: false,
     error: null,
+    omitted: 0,
+    navigation: { kind: 'stop', revision: 0 },
 
     play: async () => {
-      const id = ++generation;
-
-      cancelFrame();
-
-      useAudioStore.getState().stopAll();
-
+      if (session) return;
       const composition = useCompositionStore.getState().composition;
-
-      const volume = useProjectStore.getState().volume;
-
-      set({
-        status: 'playing',
-        error: null,
-      });
-
-      try {
-        const started = await sequencer.play(composition, get().position, volume);
-
-        if (id !== generation) return;
-
-        if (!started) {
-          get().stop();
-          return;
-        }
-
-        tick();
-      } catch (error) {
-        if (id !== generation) return;
-
-        set({
-          status: 'stopped',
-          error: error instanceof Error ? error.message : 'Playback failed',
-        });
-      }
+      await start(composition, Math.min(get().position, getCompositionLength(composition)), 'play');
     },
 
     pause: () => {
-      generation += 1;
-
-      const position = sequencer.getPosition();
-
-      cancelFrame();
-      sequencer.stop();
-
-      set({
-        position,
-        status: 'paused',
-      });
+      if (!session) return;
+      const position =
+        get().status === 'playing' ? sequencer.getPosition() : session.pendingTargetBeat;
+      finish();
+      set({ position, status: 'paused', navigation: navigation('pause') });
     },
 
     stop: () => {
-      generation += 1;
-
-      cancelFrame();
-      sequencer.stop();
-
+      finish();
       useAudioStore.getState().stopAll();
-
-      set({
-        status: 'stopped',
-        position: 0,
-      });
+      set({ status: 'stopped', position: 0, navigation: navigation('stop'), error: null });
     },
 
     seek: (beat) => {
       if (!Number.isFinite(beat)) return;
+      const composition = session?.composition ?? useCompositionStore.getState().composition;
+      const position = Math.max(0, Math.min(getCompositionLength(composition), beat));
 
-      const wasPlaying = get().status === 'playing';
-
-      generation += 1;
-
-      cancelFrame();
-      sequencer.stop();
-
-      const composition = useCompositionStore.getState().composition;
-
-      set({
-        position: Math.max(0, Math.min(getCompositionLength(composition), beat)),
-        status: 'paused',
-      });
-
-      if (wasPlaying) {
-        void get().play();
-      }
+      if (session) void start(composition, position, 'seek');
+      else set({ position, navigation: navigation('seek'), error: null });
     },
 
     toggleLoop: () => set((state) => ({ loop: !state.loop })),
@@ -157,7 +168,5 @@ export const useSequencerStore = create<SequencerState>((set, get) => {
 });
 
 useProjectStore.subscribe((state, previous) => {
-  if (state.volume !== previous.volume) {
-    sequencer.setVolume(state.volume);
-  }
+  if (state.volume !== previous.volume) sequencer.setVolume(state.volume);
 });

@@ -10,7 +10,8 @@ import { INSTRUMENT_TUNINGS } from '@/core/notation/tunings';
 
 import { findChordFingerings } from '@/core/notation/chordFingering';
 
-import { prepareTablature } from '@/core/notation/tablature';
+import { prepareScoreResult } from '@/core/notation/score';
+import { prepareTablature, prepareTablatureScore } from '@/core/notation/tablature';
 
 const guitar = INSTRUMENT_TUNINGS.guitarStandard;
 
@@ -183,4 +184,50 @@ describe('Tablature preparation', () => {
   it('handles an empty track', () => {
     expect(prepareTablature([], guitar)).toEqual([]);
   });
+});
+
+it('adapts written timing and rests without changing source fingerings or frequencies', () => {
+  const microtone = note(64.25, 0.1, 0.5);
+  const held = note(52, 0, 1);
+  const chord = note(57, 0, 1);
+  const unplayable = note(16, 1, 1);
+  const notes = [held, chord, microtone, unplayable];
+  const before = structuredClone(notes);
+  const score = prepareScoreResult(notes, 4);
+  const tab = prepareTablatureScore(score, notes, guitar);
+  expect(tab.groups).toEqual(prepareTablature(notes, guitar));
+  expect(tab.unplayableCount).toBe(1);
+  expect(tab.diagnostics).toBe(score.diagnostics);
+  for (const [i, measure] of tab.measures.entries()) {
+    for (const [j, voice] of measure.voices.entries()) {
+      expect(voice.segments.map((segment) => segment.event)).toEqual(
+        score.measures[i]!.voices[j]!.segments,
+      );
+      expect(voice.segments.reduce((sum, segment) => sum + segment.event.durationTicks, 0)).toBe(
+        1024,
+      );
+    }
+  }
+  expect(notes).toEqual(before);
+  expect(
+    tab.measures
+      .flatMap((m) => m.voices.flatMap((v) => v.segments))
+      .some((s) =>
+        s.positions.some(
+          (position) =>
+            position.note.id === microtone.id &&
+            position.note.pitch.frequency === microtone.pitch.frequency,
+        ),
+      ),
+  ).toBe(true);
+});
+
+it('retains the partial prepared result without converting omissions into tuning failures', () => {
+  const notes = [note(64, 0.02, 0.01)];
+  const partial = prepareScoreResult(notes, 0.0625, [1, 64], { probesPerScore: 0 });
+  expect(partial.classification).toBe('partial');
+  const tab = prepareTablatureScore(partial, notes, guitar);
+  expect(tab.diagnostics).toBe(partial.diagnostics);
+  expect(tab.measures[0]!.voices[0]!.segments.every((s) => s.event.isRest)).toBe(true);
+  expect(tab.unplayableCount).toBe(0);
 });

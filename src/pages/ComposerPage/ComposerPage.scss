@@ -257,3 +257,14 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.composer-page :is(input, select):disabled {
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.piano-roll rect[role='button']:focus-visible {
+  stroke: var(--color-accent);
+  outline: none;
+}

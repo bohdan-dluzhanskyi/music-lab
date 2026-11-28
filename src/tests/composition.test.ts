@@ -1,3 +1,5 @@
+import { prepareScoreResult } from '@/core/notation/score';
+import { pianoFixture } from './fixtures/pianoGrandStaff';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -162,4 +164,16 @@ describe('Audio scheduling', () => {
 
     expect(getScheduledNotes(composition)[0]!.frequency).toBe(355.967478);
   });
+});
+
+it('keeps the persisted payload and scheduling identical after score preparation', () => {
+  const payload = pianoFixture();
+  const snapshot = structuredClone(payload);
+  const { composition } = payload.state;
+  const length = getCompositionLength(composition);
+  const schedule = getScheduledNotes(composition, 0.4);
+  prepareScoreResult(composition.tracks[0]!.notes, length, composition.timeSignature);
+  expect(payload).toEqual(snapshot);
+  expect(getCompositionLength(composition)).toBe(length);
+  expect(getScheduledNotes(composition, 0.4)).toEqual(schedule);
 });

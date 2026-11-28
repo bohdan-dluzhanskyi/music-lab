@@ -1,7 +1,8 @@
 import { Trash2 } from 'lucide-react';
 
+import { compositionEditGate } from '@/stores/compositionEditGate';
 import { useCompositionStore } from '@/stores/composition.store';
-import { useSequencerStore } from '@/stores/sequencer.store';
+import { isCompositionPlaybackActive, useSequencerStore } from '@/stores/sequencer.store';
 
 import { frequencyToClockAngle } from '@/core/geometry/noteClock';
 
@@ -9,7 +10,7 @@ export default function NoteInspector() {
   const { composition, selectedTrackId, selectedNoteId, updateNote, removeNote } =
     useCompositionStore();
 
-  const playing = useSequencerStore((state) => state.status === 'playing');
+  const editingLocked = useSequencerStore(isCompositionPlaybackActive);
 
   const track = composition.tracks.find((item) => item.id === selectedTrackId);
 
@@ -65,7 +66,7 @@ export default function NoteInspector() {
         <h2>Note Inspector</h2>
 
         <button
-          disabled={playing}
+          disabled={editingLocked}
           aria-label="Delete note"
           onClick={() => removeNote(track.id, note.id)}
         >
@@ -93,8 +94,13 @@ export default function NoteInspector() {
             min={field.min}
             max={field.max}
             step={field.step}
-            disabled={playing}
+            disabled={editingLocked}
             onBlur={(event) => {
+              if (compositionEditGate.isLocked()) {
+                event.target.value = String(field.value);
+                return;
+              }
+
               const value = event.target.valueAsNumber;
 
               if (Number.isFinite(value) && value >= field.min && value <= field.max) {

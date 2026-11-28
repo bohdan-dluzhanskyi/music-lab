@@ -48,3 +48,20 @@ export function splitIntoMeasures(
     };
   });
 }
+
+export interface MeasureRange {
+  index: number;
+  startBeat: number;
+  endBeat: number;
+  playableEndBeat: number;
+}
+
+export function getMeasureRange(
+  index: number,
+  beatsPerMeasure: number,
+  length: number,
+): MeasureRange {
+  const startBeat = index * beatsPerMeasure;
+  const endBeat = (index + 1) * beatsPerMeasure;
+  return { index, startBeat, endBeat, playableEndBeat: Math.min(length, endBeat) };
+}

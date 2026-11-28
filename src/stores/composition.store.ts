@@ -12,6 +12,7 @@ import {
 } from '@/core/composition/composition';
 
 import { frequencyToPitch } from '@/core/music/notes';
+import { compositionEditGate } from './compositionEditGate';
 
 type TrackPatch = Partial<Omit<Track, 'id' | 'notes'>>;
 
@@ -95,13 +96,14 @@ export const useCompositionStore = create<CompositionState>()(
 
         selectNote: (id) => set({ selectedNoteId: id }),
 
-        setName: (name) =>
-          commit({
-            ...get().composition,
-            name,
-          }),
+        setName: (name) => {
+          if (compositionEditGate.isLocked()) return;
+          commit({ ...get().composition, name });
+        },
 
         setBpm: (bpm) => {
+          if (compositionEditGate.isLocked()) return;
+
           if (!Number.isFinite(bpm)) return;
 
           commit({
@@ -111,6 +113,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         addTrack: () => {
+          if (compositionEditGate.isLocked()) return;
+
           const composition = get().composition;
           const track = createTrack(composition.tracks.length);
 
@@ -126,6 +130,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         removeTrack: (id) => {
+          if (compositionEditGate.isLocked()) return;
+
           const composition = get().composition;
 
           if (composition.tracks.length <= 1) return;
@@ -141,6 +147,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         updateTrack: (id, patch) => {
+          if (compositionEditGate.isLocked()) return;
+
           if (patch.volume !== undefined && !Number.isFinite(patch.volume)) {
             return;
           }
@@ -153,6 +161,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         addNote: (trackId, frequency, startBeat, durationBeats = 0.5) => {
+          if (compositionEditGate.isLocked()) return;
+
           const note = createCompositionNote(trackId, frequency, startBeat, durationBeats);
 
           changeTrack(trackId, (track) => ({
@@ -166,7 +176,9 @@ export const useCompositionStore = create<CompositionState>()(
           });
         },
 
-        updateNote: (trackId, noteId, patch) =>
+        updateNote: (trackId, noteId, patch) => {
+          if (compositionEditGate.isLocked()) return;
+
           changeTrack(trackId, (track) => ({
             ...track,
             notes: track.notes.map((note) => {
@@ -187,9 +199,12 @@ export const useCompositionStore = create<CompositionState>()(
                   patch.frequency === undefined ? note.pitch : frequencyToPitch(patch.frequency),
               };
             }),
-          })),
+          }));
+        },
 
         removeNote: (trackId, noteId) => {
+          if (compositionEditGate.isLocked()) return;
+
           changeTrack(trackId, (track) => ({
             ...track,
             notes: track.notes.filter((note) => note.id !== noteId),
@@ -199,6 +214,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         importSequence: (notes, name = 'Mathematics', totalBeats = 0) => {
+          if (compositionEditGate.isLocked()) return;
+
           const composition = get().composition;
           const track = createTrack(composition.tracks.length);
 
@@ -227,6 +244,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         undo: () => {
+          if (compositionEditGate.isLocked()) return;
+
           const { past, future, composition } = get();
           const previous = past.at(-1);
 
@@ -242,6 +261,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         redo: () => {
+          if (compositionEditGate.isLocked()) return;
+
           const { past, future, composition } = get();
           const next = future[0];
 
@@ -257,6 +278,8 @@ export const useCompositionStore = create<CompositionState>()(
         },
 
         reset: () => {
+          if (compositionEditGate.isLocked()) return;
+
           const composition = createComposition();
 
           commit(composition);

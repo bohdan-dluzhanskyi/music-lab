@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import {
   tablatureEngine,
@@ -8,11 +8,12 @@ import {
 
 import './Tablature.scss';
 
-type TablatureProps = TablatureRenderOptions;
+type TablatureProps = TablatureRenderOptions & { isCurrent?: () => boolean };
 
 export default function Tablature({
   notes,
-  lengthBeats,
+  score,
+  isCurrent,
   timeSignature,
   tuning,
   maxStretch = 4,
@@ -26,22 +27,24 @@ export default function Tablature({
 
   const [showAlternatives, setShowAlternatives] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = containerRef.current;
 
     if (!container) return;
 
     const frameId = requestAnimationFrame(() => {
+      if (isCurrent && !isCurrent()) return;
       try {
         const rendered = tablatureEngine.render(container, {
           notes,
-          lengthBeats,
+          score,
           timeSignature,
           tuning,
           maxStretch,
           showCents,
         });
 
+        if (isCurrent && !isCurrent()) return;
         setResult(rendered);
         setError('');
       } catch (error) {
@@ -57,7 +60,7 @@ export default function Tablature({
       cancelAnimationFrame(frameId);
       tablatureEngine.clear(container);
     };
-  }, [notes, lengthBeats, timeSignature, tuning, maxStretch, showCents]);
+  }, [notes, score, timeSignature, tuning, maxStretch, showCents, isCurrent]);
 
   return (
     <section className="tablature">

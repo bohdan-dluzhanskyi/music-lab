@@ -23,7 +23,7 @@ export interface Composition {
   tracks: Track[];
 }
 
-export type PlaybackStatus = 'stopped' | 'playing' | 'paused';
+export type PlaybackStatus = 'stopped' | 'initializing' | 'playing' | 'paused';
 
 export interface LoopRegion {
   enabled: boolean;
@@ -32,6 +32,7 @@ export interface LoopRegion {
 }
 
 export interface ScheduledNote {
+  sourceNoteId: string;
   trackId: string;
   frequency: number;
   startBeat: number;

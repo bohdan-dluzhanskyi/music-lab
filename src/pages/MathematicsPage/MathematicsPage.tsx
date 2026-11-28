@@ -25,8 +25,8 @@ import { useProjectStore } from '@/stores/project.store';
 
 import SequencePreview from '@/features/mathematics/SequencePreview';
 
-import { useCompositionStore } from '@/stores/composition.store';
-import { useSequencerStore } from '@/stores/sequencer.store';
+import { transferSequence } from '@/features/mathematics/transferSequence';
+import { isCompositionPlaybackActive, useSequencerStore } from '@/stores/sequencer.store';
 
 import './MathematicsPage.scss';
 
@@ -84,7 +84,7 @@ export default function MathematicsPage() {
   const playChord = useAudioStore((state) => state.playChord);
 
   const navigate = useNavigate();
-  const importSequence = useCompositionStore((state) => state.importSequence);
+  const editingLocked = useSequencerStore(isCompositionPlaybackActive);
 
   const durationBeats = 0.5;
   const totalBeats = count * durationBeats;
@@ -258,13 +258,7 @@ export default function MathematicsPage() {
   }
 
   function sendToComposer() {
-    useSequencerStore.getState().stop();
-
-    importSequence(sequence, `${generator} — ${weight}%`, totalBeats);
-
-    useCompositionStore.getState().setBpm(bpm);
-
-    navigate('/composer');
+    transferSequence(sequence, `${generator} — ${weight}%`, totalBeats, bpm, navigate);
   }
 
   return (
@@ -372,7 +366,10 @@ export default function MathematicsPage() {
                 <Download size={16} />
                 Export JSON
               </button>
-              <button disabled={isPlaying || !sequence.length} onClick={sendToComposer}>
+              <button
+                disabled={editingLocked || isPlaying || !sequence.length}
+                onClick={sendToComposer}
+              >
                 <ArrowRight size={16} />
                 Send to Composer
               </button>

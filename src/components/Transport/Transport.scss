@@ -1,7 +1,9 @@
 .transport {
   display: flex;
   align-items: center;
-  gap: var(--space-5);
+  gap: clamp(var(--space-2), 1.4vw, var(--space-5));
+  flex-wrap: wrap;
+  min-width: 0;
 
   min-height: var(--transport-height);
   padding: var(--space-2) var(--space-5);
@@ -58,11 +60,12 @@
 
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   &__parameters {
     margin-left: auto;
-    gap: var(--space-5);
+    gap: clamp(var(--space-2), 1.4vw, var(--space-5));
   }
 
   &__field {
@@ -100,4 +103,10 @@
       accent-color: var(--color-accent);
     }
   }
+}
+
+.transport__phase {
+  min-inline-size: 12ch;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
 }

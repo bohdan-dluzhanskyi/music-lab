@@ -2,6 +2,8 @@ import type { NoteEvent } from '@/core/types/music.types';
 
 import type { InstrumentTuning, TablatureNote } from '@/core/types/notation.types';
 
+import type { PreparedScore } from './score';
+
 import { findChordFingerings, type ChordFingering } from './chordFingering';
 
 export interface TablatureGroup {
@@ -79,4 +81,33 @@ export function prepareTablature(
         playable: Boolean(best),
       };
     });
+}
+
+export function prepareTablatureScore(
+  score: PreparedScore,
+  notes: readonly NoteEvent[],
+  tuning: InstrumentTuning,
+  maxStretch = 4,
+) {
+  const groups = prepareTablature(notes, tuning, maxStretch);
+  const fingerings = groups.flatMap((group) => group.notes);
+  const byId = new Map(fingerings.map((item) => [item.note.id, item]));
+  return {
+    groups,
+    unplayableCount: fingerings.filter((item) => !item.position).length,
+    diagnostics: score.diagnostics,
+    measures: score.measures.map((measure) => ({
+      index: measure.index,
+      voices: measure.voices.map((voice) => ({
+        id: voice.id,
+        segments: voice.segments.map((event) => ({
+          event,
+          positions: event.sourceNoteIds.flatMap((id) => {
+            const item = byId.get(id);
+            return item?.position ? [{ note: item.note, position: item.position }] : [];
+          }),
+        })),
+      })),
+    })),
+  };
 }
